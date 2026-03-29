@@ -728,8 +728,8 @@ export default function FocusDotGame() {
             <ThemeToggle isDark={isDark} onToggle={toggleTheme} t={t} />
           </div>
 
-          <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 48, fontWeight: 800, background: "linear-gradient(135deg, #00E5FF, #9B6DFF, #E84393)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: -1, marginBottom: 8 }}>FOCUS</div>
-          <div style={{ fontSize: 14, color: t.textMuted, letterSpacing: 6, textTransform: "uppercase", marginBottom: 32 }}>DOT GAME</div>
+          <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 44, fontWeight: 800, background: "linear-gradient(135deg, #00E5FF, #9B6DFF, #E84393)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: -1, marginBottom: 8 }}>DOTHUNTER</div>
+          <div style={{ fontSize: 14, color: t.textMuted, letterSpacing: 6, textTransform: "uppercase", marginBottom: 32 }}>HUNT EVERY DOT</div>
 
           <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#00E5FF", boxShadow: "0 0 30px #00E5FF66", animation: "pulseGlowDynamic 2s infinite", marginBottom: 28 }} />
 
