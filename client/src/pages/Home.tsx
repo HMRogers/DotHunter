@@ -693,12 +693,23 @@ export default function FocusDotGame() {
     }
   }, [purchaseQuery.data, persistAll]);
 
-  // Check for payment success/cancel URL params
+  // Check for payment success/cancel URL params — verify with server before unlocking
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const payment = params.get("payment");
     if (payment === "success") {
-      persistAll({ unlocked: true });
+      // Don't blindly trust the URL param — verify with the server
+      const deviceId = getDeviceId();
+      fetch(`/api/device/status?deviceId=${encodeURIComponent(deviceId)}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.gameUnlocked) {
+            persistAll({ unlocked: true });
+          }
+        })
+        .catch(() => {
+          // If server check fails, refetch via tRPC on next load
+        });
       // Clean up URL
       window.history.replaceState({}, "", window.location.pathname);
     } else if (payment === "cancelled") {
