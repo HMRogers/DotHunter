@@ -1,0 +1,11 @@
+
+- [x] Resolve upgrade conflicts - restore game Home.tsx
+- [x] Set up Stripe secrets (publishable and secret keys)
+- [x] Add Stripe feature integration
+- [x] Create Stripe product and price for $1.99 unlock
+- [x] Implement Stripe checkout flow in the paywall
+- [x] Add purchase verification endpoint
+- [x] Store purchase status in database
+- [x] Run database migration (pnpm db:push)
+- [x] Write vitest tests for Stripe payment flow
+- [ ] Configure dothuntergame.app domain

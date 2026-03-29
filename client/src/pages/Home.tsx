@@ -5,6 +5,9 @@
  * Colors: Deep navy bg, neon cyan/green/magenta accents
  */
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
+import { getLoginUrl } from "@/const";
 import { playTap, playMiss, playWrongColor, playRoundUp, playGameOver, playAchievement } from "@/lib/audio";
 import {
   DOTS_PER_ROUND, BASE_TIME_MS, TIME_DECREASE, MIN_TIME_MS, MAX_MISSES, FREE_ROUNDS_LIMIT,
@@ -675,10 +678,58 @@ export default function FocusDotGame() {
     persistAll({ freeRoundsUsed: fru });
   }, [persistAll]);
 
-  const handleUnlock = useCallback(() => {
-    persistAll({ unlocked: true });
-    setScreen("menu");
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+  // Check server-side unlock status on load (if authenticated)
+  const { user: authUser, isAuthenticated } = useAuth();
+  const purchaseQuery = trpc.purchase.status.useQuery(undefined, {
+    enabled: isAuthenticated,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const createCheckoutMutation = trpc.purchase.createCheckout.useMutation();
+
+  // Sync server unlock status to local state
+  useEffect(() => {
+    if (purchaseQuery.data?.gameUnlocked && !gameDataRef.current.unlocked) {
+      persistAll({ unlocked: true });
+    }
+  }, [purchaseQuery.data, persistAll]);
+
+  // Check for payment success/cancel URL params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const payment = params.get("payment");
+    if (payment === "success") {
+      persistAll({ unlocked: true });
+      // Clean up URL
+      window.history.replaceState({}, "", window.location.pathname);
+    } else if (payment === "cancelled") {
+      window.history.replaceState({}, "", window.location.pathname);
+    }
   }, [persistAll]);
+
+  const handleUnlock = useCallback(async () => {
+    if (!isAuthenticated) {
+      // Redirect to login first
+      window.location.href = getLoginUrl();
+      return;
+    }
+    setCheckoutLoading(true);
+    try {
+      const result = await createCheckoutMutation.mutateAsync();
+      if (result.alreadyUnlocked) {
+        persistAll({ unlocked: true });
+        setScreen("menu");
+      } else if (result.url) {
+        window.open(result.url, "_blank");
+      }
+    } catch (err) {
+      console.error("Checkout error:", err);
+    } finally {
+      setCheckoutLoading(false);
+    }
+  }, [isAuthenticated, createCheckoutMutation, persistAll]);
 
   const startGame = useCallback((selectedMode: number) => {
     if (!checkFreeRounds(selectedMode)) {
@@ -1031,16 +1082,22 @@ export default function FocusDotGame() {
             </div>
 
             {/* Price button */}
-            <button onClick={handleUnlock} style={{
-              width: "100%", padding: "18px 0", background: `linear-gradient(135deg, ${mc}, ${mc}cc)`,
-              border: "none", borderRadius: 14, color: isDark ? "#0a0a1a" : "#fff",
-              fontSize: 18, fontWeight: 800, fontFamily: "'Outfit', sans-serif", cursor: "pointer",
-              boxShadow: `0 4px 24px ${mc}44`, marginBottom: 10,
-              letterSpacing: 0.5,
+            {!isAuthenticated && (
+              <div style={{ fontSize: 12, color: t.textMuted, marginBottom: 12, textAlign: "center", padding: "8px 16px", background: `${mc}08`, borderRadius: 10, border: `1px solid ${mc}22` }}>
+                Sign in required to purchase
+              </div>
+            )}
+            <button onClick={handleUnlock} disabled={checkoutLoading} style={{
+              width: "100%", padding: "18px 0", background: checkoutLoading ? t.barBg : `linear-gradient(135deg, ${mc}, ${mc}cc)`,
+              border: "none", borderRadius: 14, color: checkoutLoading ? t.textMuted : (isDark ? "#0a0a1a" : "#fff"),
+              fontSize: 18, fontWeight: 800, fontFamily: "'Outfit', sans-serif",
+              cursor: checkoutLoading ? "wait" : "pointer",
+              boxShadow: checkoutLoading ? "none" : `0 4px 24px ${mc}44`, marginBottom: 10,
+              letterSpacing: 0.5, transition: "all 0.3s",
             }}>
-              UNLOCK FOR $1.99
+              {checkoutLoading ? "REDIRECTING..." : (!isAuthenticated ? "SIGN IN TO UNLOCK — $1.99" : "UNLOCK FOR $1.99")}
             </button>
-            <div style={{ fontSize: 11, color: t.textMuted, marginBottom: 20 }}>One-time purchase. No subscriptions.</div>
+            <div style={{ fontSize: 11, color: t.textMuted, marginBottom: 20 }}>One-time purchase via Stripe. No subscriptions.</div>
 
             <button onClick={() => setScreen("menu")} style={{ background: "none", border: "none", color: t.textMuted, fontSize: 13, fontFamily: "inherit", cursor: "pointer", padding: "8px 16px" }}>
               \u2190 Back to Menu
