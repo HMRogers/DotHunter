@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "buildCommand": "pnpm run build:client",
+  "outputDirectory": "dist/public",
+  "installCommand": "pnpm install",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/api/trpc/:path*", "destination": "/api/trpc/[trpc]" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
+}

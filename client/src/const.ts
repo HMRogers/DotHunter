@@ -4,6 +4,13 @@ export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 export const getLoginUrl = () => {
   const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
   const appId = import.meta.env.VITE_APP_ID;
+
+  // If OAuth env vars are not configured (e.g. static/Vercel deploy without backend),
+  // return a safe fallback instead of crashing with "Invalid URL".
+  if (!oauthPortalUrl || oauthPortalUrl === "undefined") {
+    return "#";
+  }
+
   const redirectUri = `${window.location.origin}/api/oauth/callback`;
   const state = btoa(redirectUri);
 
