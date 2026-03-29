@@ -7,7 +7,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { playTap, playMiss, playWrongColor, playRoundUp, playGameOver, playAchievement } from "@/lib/audio";
 import {
-  DOTS_PER_ROUND, BASE_TIME_MS, TIME_DECREASE, MIN_TIME_MS, MAX_MISSES,
+  DOTS_PER_ROUND, BASE_TIME_MS, TIME_DECREASE, MIN_TIME_MS, MAX_MISSES, FREE_ROUNDS_LIMIT,
   DOT_SIZE, DOT_SIZE_SM, DECOY_COLORS, TARGET_COLOR_MODE2, ALL_COLORS,
   rand, getPos, getNonOverlapping, themes,
   defaultStats, defaultGameData, MODE_LABELS, MODE_COLORS_TAG,
@@ -279,7 +279,7 @@ function ScoreHistory({ recentGames, t }: { recentGames: GameData["recentGames"]
 // MAIN GAME
 // ═══════════════════════════════════════════
 export default function FocusDotGame() {
-  const [screen, setScreen] = useState<"menu" | "nameEntry" | "colorPicker" | "playing" | "roundEnd" | "gameOver">("menu");
+  const [screen, setScreen] = useState<"menu" | "nameEntry" | "colorPicker" | "playing" | "roundEnd" | "gameOver" | "paywall">("menu");
   const [playerName, setPlayerName] = useState("");
   const [mode, setMode] = useState(1);
   const [round, setRound] = useState(1);
@@ -337,6 +337,8 @@ export default function FocusDotGame() {
       if (saved) {
         if (!saved.stats) saved.stats = defaultStats();
         if (!saved.achievements) saved.achievements = [];
+        if (saved.unlocked === undefined) saved.unlocked = false;
+        if (!saved.freeRoundsUsed) saved.freeRoundsUsed = { 1: 0, 2: 0, 3: 0 };
         setGameData(saved);
         setIsDark(saved.theme !== "light");
         if (saved.playerName) setPlayerName(saved.playerName);
@@ -660,7 +662,32 @@ export default function FocusDotGame() {
     }, 700);
   }, [spawnDot]);
 
+  const checkFreeRounds = useCallback((selectedMode: number): boolean => {
+    if (gameDataRef.current.unlocked) return true;
+    const used = gameDataRef.current.freeRoundsUsed?.[selectedMode] || 0;
+    return used < FREE_ROUNDS_LIMIT;
+  }, []);
+
+  const consumeFreeRound = useCallback((selectedMode: number) => {
+    if (gameDataRef.current.unlocked) return;
+    const fru = { ...(gameDataRef.current.freeRoundsUsed || { 1: 0, 2: 0, 3: 0 }) };
+    fru[selectedMode] = (fru[selectedMode] || 0) + 1;
+    persistAll({ freeRoundsUsed: fru });
+  }, [persistAll]);
+
+  const handleUnlock = useCallback(() => {
+    persistAll({ unlocked: true });
+    setScreen("menu");
+  }, [persistAll]);
+
   const startGame = useCallback((selectedMode: number) => {
+    if (!checkFreeRounds(selectedMode)) {
+      setMode(selectedMode);
+      modeRef.current = selectedMode;
+      setScreen("paywall");
+      return;
+    }
+    consumeFreeRound(selectedMode);
     setMode(selectedMode);
     modeRef.current = selectedMode;
     setRound(1);
@@ -674,7 +701,7 @@ export default function FocusDotGame() {
     setScreen("playing");
     persistAll({ playerName });
     setTimeout(() => startRound(1), 100);
-  }, [startRound, persistAll, playerName]);
+  }, [startRound, persistAll, playerName, checkFreeRounds, consumeFreeRound]);
 
   const nextRound = useCallback(() => {
     const nr = round + 1;
@@ -791,15 +818,34 @@ export default function FocusDotGame() {
             onBlur={e => (e.target.style.borderColor = t.inputBorder)}
           />
           <div style={{ fontSize: 13, color: t.textMuted, marginBottom: 14, letterSpacing: 3, textTransform: "uppercase" }}>Select Mode</div>
-          <button onClick={() => startGame(1)} style={{ width: "100%", padding: "14px 0", background: isDark ? "#00E5FF08" : "#00E5FF12", border: "1.5px solid #00E5FF44", borderRadius: 14, color: "#00E5FF", fontSize: 15, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", marginBottom: 10 }}>
-            <span style={{ fontSize: 18 }}>●</span>&nbsp;&nbsp;Classic Focus<div style={{ fontSize: 11, color: t.textMuted, marginTop: 3 }}>Single dot — pure speed</div>
-          </button>
-          <button onClick={() => startGame(2)} style={{ width: "100%", padding: "14px 0", background: isDark ? "#00E67608" : "#00E67612", border: "1.5px solid #00E67644", borderRadius: 14, color: TARGET_COLOR_MODE2, fontSize: 15, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", marginBottom: 10 }}>
-            <span style={{ fontSize: 18 }}>●</span><span style={{ fontSize: 14, marginLeft: 4 }}><span style={{ color: "#FF4D6A" }}>●</span><span style={{ color: "#FFB830" }}>●</span><span style={{ color: "#9B6DFF" }}>●</span></span>&nbsp;&nbsp;Color Filter<div style={{ fontSize: 11, color: t.textMuted, marginTop: 3 }}>Tap green, ignore decoys</div>
-          </button>
-          <button onClick={() => { setPickedColors([]); setScreen("colorPicker"); }} style={{ width: "100%", padding: "14px 0", background: isDark ? "#E8439308" : "#E8439312", border: "1.5px solid #E8439344", borderRadius: 14, color: "#E84393", fontSize: 15, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", marginBottom: 10 }}>
-            <span style={{ fontSize: 18 }}>●●</span>&nbsp;&nbsp;Dual Hunt<div style={{ fontSize: 11, color: t.textMuted, marginTop: 3 }}>Pick 2 colors to hunt</div>
-          </button>
+          {!gameData.unlocked && (
+            <div style={{ fontSize: 11, color: t.textMuted, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" /><path d="M12 7v5l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+              Free trial — {FREE_ROUNDS_LIMIT} rounds per mode
+            </div>
+          )}
+          {(() => {
+            const fru = gameData.freeRoundsUsed || { 1: 0, 2: 0, 3: 0 };
+            const isUnlocked = gameData.unlocked;
+            const freeTag = (m: number, color: string) => !isUnlocked ? (
+              <div style={{ fontSize: 10, marginTop: 4, color: fru[m] >= FREE_ROUNDS_LIMIT ? "#FF4D6A" : color, opacity: 0.7 }}>
+                {fru[m] >= FREE_ROUNDS_LIMIT ? "\uD83D\uDD12 Locked" : `${FREE_ROUNDS_LIMIT - (fru[m] || 0)} free round${FREE_ROUNDS_LIMIT - (fru[m] || 0) !== 1 ? "s" : ""} left`}
+              </div>
+            ) : null;
+            return (
+              <>
+                <button onClick={() => startGame(1)} style={{ width: "100%", padding: "14px 0", background: isDark ? "#00E5FF08" : "#00E5FF12", border: "1.5px solid #00E5FF44", borderRadius: 14, color: "#00E5FF", fontSize: 15, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", marginBottom: 10 }}>
+                  <span style={{ fontSize: 18 }}>●</span>&nbsp;&nbsp;Classic Focus<div style={{ fontSize: 11, color: t.textMuted, marginTop: 3 }}>Single dot — pure speed</div>{freeTag(1, "#00E5FF")}
+                </button>
+                <button onClick={() => startGame(2)} style={{ width: "100%", padding: "14px 0", background: isDark ? "#00E67608" : "#00E67612", border: "1.5px solid #00E67644", borderRadius: 14, color: TARGET_COLOR_MODE2, fontSize: 15, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", marginBottom: 10 }}>
+                  <span style={{ fontSize: 18 }}>●</span><span style={{ fontSize: 14, marginLeft: 4 }}><span style={{ color: "#FF4D6A" }}>●</span><span style={{ color: "#FFB830" }}>●</span><span style={{ color: "#9B6DFF" }}>●</span></span>&nbsp;&nbsp;Color Filter<div style={{ fontSize: 11, color: t.textMuted, marginTop: 3 }}>Tap green, ignore decoys</div>{freeTag(2, "#00E676")}
+                </button>
+                <button onClick={() => { if (fru[3] >= FREE_ROUNDS_LIMIT && !isUnlocked) { setMode(3); modeRef.current = 3; setScreen("paywall"); return; } setPickedColors([]); setScreen("colorPicker"); }} style={{ width: "100%", padding: "14px 0", background: isDark ? "#E8439308" : "#E8439312", border: "1.5px solid #E8439344", borderRadius: 14, color: "#E84393", fontSize: 15, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", marginBottom: 10 }}>
+                  <span style={{ fontSize: 18 }}>●●</span>&nbsp;&nbsp;Dual Hunt<div style={{ fontSize: 11, color: t.textMuted, marginTop: 3 }}>Pick 2 colors to hunt</div>{freeTag(3, "#E84393")}
+                </button>
+              </>
+            );
+          })()}
           <button onClick={() => setScreen("menu")} style={{ marginTop: 16, background: "none", border: "none", color: t.textMuted, fontSize: 13, fontFamily: "inherit", cursor: "pointer" }}>← Back</button>
         </div>
       )}
@@ -944,6 +990,64 @@ export default function FocusDotGame() {
           }}>NEXT ROUND →</button>
         </div>
       )}
+
+      {/* ═══════ PAYWALL ═══════ */}
+      {screen === "paywall" && (() => {
+        const modeNames: Record<number, string> = { 1: "Classic Focus", 2: "Color Filter", 3: "Dual Hunt" };
+        const modeColors: Record<number, string> = { 1: "#00E5FF", 2: "#00E676", 3: "#E84393" };
+        const mc = modeColors[mode] || "#00E5FF";
+        return (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, width: "100%", padding: "40px 24px", animation: "fadeSlideUp 0.4s ease", maxWidth: 420 }}>
+            <div style={{ position: "absolute", top: 16, right: 20 }}><ThemeToggle isDark={isDark} onToggle={toggleTheme} t={t} /></div>
+
+            {/* Lock icon */}
+            <div style={{ width: 80, height: 80, borderRadius: 20, background: `${mc}12`, border: `2px solid ${mc}33`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24 }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="11" width="18" height="11" rx="2" stroke={mc} strokeWidth="2" fill={`${mc}20`} />
+                <path d="M7 11V7a5 5 0 0110 0v4" stroke={mc} strokeWidth="2" strokeLinecap="round" />
+                <circle cx="12" cy="16.5" r="1.5" fill={mc} />
+              </svg>
+            </div>
+
+            <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 26, fontWeight: 800, color: t.text, marginBottom: 8, textAlign: "center" }}>Unlock Full Game</div>
+            <div style={{ fontSize: 14, color: t.textDim, textAlign: "center", lineHeight: 1.6, marginBottom: 28, maxWidth: 320 }}>
+              You've used all {FREE_ROUNDS_LIMIT} free rounds for <span style={{ color: mc, fontWeight: 600 }}>{modeNames[mode]}</span>. Unlock unlimited play across all modes.
+            </div>
+
+            {/* What you get */}
+            <div style={{ width: "100%", background: t.cardBg, borderRadius: 16, padding: "20px 22px", border: `1px solid ${t.border}`, marginBottom: 24 }}>
+              <div style={{ fontSize: 11, color: t.textMuted, letterSpacing: 2, textTransform: "uppercase", marginBottom: 14 }}>What You Get</div>
+              {[
+                { icon: "\u221E", text: "Unlimited rounds in all 3 modes" },
+                { icon: "\u2605", text: "Full achievement tracking" },
+                { icon: "\u26A1", text: "No ads, no interruptions" },
+                { icon: "\u2764", text: "Support indie game development" },
+              ].map((item, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 0", borderBottom: i < 3 ? `1px solid ${t.border}` : "none" }}>
+                  <div style={{ width: 28, height: 28, borderRadius: 8, background: `${mc}12`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: mc }}>{item.icon}</div>
+                  <div style={{ fontSize: 13, color: t.textDim }}>{item.text}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Price button */}
+            <button onClick={handleUnlock} style={{
+              width: "100%", padding: "18px 0", background: `linear-gradient(135deg, ${mc}, ${mc}cc)`,
+              border: "none", borderRadius: 14, color: isDark ? "#0a0a1a" : "#fff",
+              fontSize: 18, fontWeight: 800, fontFamily: "'Outfit', sans-serif", cursor: "pointer",
+              boxShadow: `0 4px 24px ${mc}44`, marginBottom: 10,
+              letterSpacing: 0.5,
+            }}>
+              UNLOCK FOR $1.99
+            </button>
+            <div style={{ fontSize: 11, color: t.textMuted, marginBottom: 20 }}>One-time purchase. No subscriptions.</div>
+
+            <button onClick={() => setScreen("menu")} style={{ background: "none", border: "none", color: t.textMuted, fontSize: 13, fontFamily: "inherit", cursor: "pointer", padding: "8px 16px" }}>
+              \u2190 Back to Menu
+            </button>
+          </div>
+        );
+      })()}
 
       {/* ═══════ GAME OVER ═══════ */}
       {screen === "gameOver" && (

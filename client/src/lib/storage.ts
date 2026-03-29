@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════
 // STORAGE — uses localStorage for persistence
 // ═══════════════════════════════════════════
-const STORAGE_KEY = "focus-game-data";
+const STORAGE_KEY = "dothunter-data";
 
 export async function loadData(): Promise<any | null> {
   try {

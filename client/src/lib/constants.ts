@@ -6,6 +6,7 @@ export const BASE_TIME_MS = 2200;
 export const TIME_DECREASE = 180;
 export const MIN_TIME_MS = 600;
 export const MAX_MISSES = 3;
+export const FREE_ROUNDS_LIMIT = 3;
 export const DOT_SIZE = 56;
 export const DOT_SIZE_SM = 46;
 export const DECOY_COLORS = ["#FF4D6A", "#FFB830", "#9B6DFF", "#FF6B35", "#E84393"];
@@ -142,6 +143,8 @@ export interface GameData {
   playerName: string;
   achievements: string[];
   stats: GameStats;
+  unlocked: boolean;
+  freeRoundsUsed: { [mode: number]: number };
 }
 
 export interface GameResult {
@@ -166,6 +169,8 @@ export function defaultGameData(): GameData {
     playerName: "",
     achievements: [],
     stats: defaultStats(),
+    unlocked: false,
+    freeRoundsUsed: { 1: 0, 2: 0, 3: 0 },
   };
 }
 
