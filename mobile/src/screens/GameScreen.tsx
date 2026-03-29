@@ -19,7 +19,7 @@ import {
 import { ACHIEVEMENT_DEFS, TIER_BORDER, checkNewAchievements, type AchievementDef } from "../lib/achievements";
 import { loadData, saveData } from "../lib/storage";
 import { playTap, playMiss, playWrongColor, playRoundUp, playGameOver, playAchievement } from "../lib/audio";
-import { initIAP, purchaseUnlock, restorePurchases, disconnectIAP } from "../lib/purchase";
+import { initIAP, purchaseUnlock, restorePurchases, disconnectIAP, checkUnlockStatus } from "../lib/purchase";
 import Dot from "../components/Dot";
 import TimerBar from "../components/TimerBar";
 import MissIndicator from "../components/MissIndicator";
@@ -107,15 +107,8 @@ export default function GameScreen() {
       setLoaded(true);
     })();
 
-    // Init IAP
-    initIAP(() => {
-      // On successful purchase
-      const next = { ...gameDataRef.current, unlocked: true };
-      setGameData(next);
-      gameDataRef.current = next;
-      saveData(next);
-      setScreen("menu");
-    });
+    // Init purchase system (no-op for web-based checkout)
+    initIAP(() => {});
 
     return () => {
       disconnectIAP();
@@ -529,22 +522,26 @@ export default function GameScreen() {
     try {
       const success = await purchaseUnlock();
       if (!success) {
-        // IAP not available — offer web fallback
         Alert.alert(
-          "Purchase",
-          "In-app purchases are not available in this build. You can unlock via the web version at dothuntergame.app",
-          [
-            { text: "Open Web", onPress: () => Linking.openURL("https://dothuntergame.app/play") },
-            { text: "Cancel", style: "cancel" },
-          ]
+          "Purchase Error",
+          "Could not open checkout. Please try again.",
+          [{ text: "OK" }]
         );
+      } else {
+        // After returning from browser, check if payment was completed
+        const unlocked = await checkUnlockStatus();
+        if (unlocked) {
+          persistAll({ unlocked: true });
+          Alert.alert("Unlocked!", "Full game access activated. Enjoy!");
+          setScreen("menu");
+        }
       }
     } catch (e) {
       console.error("Purchase error:", e);
     } finally {
       setCheckoutLoading(false);
     }
-  }, []);
+  }, [persistAll]);
 
   const handleRestore = useCallback(async () => {
     const restored = await restorePurchases();
@@ -553,7 +550,7 @@ export default function GameScreen() {
       Alert.alert("Restored", "Your purchase has been restored!");
       setScreen("menu");
     } else {
-      Alert.alert("No Purchases", "No previous purchases found.");
+      Alert.alert("No Purchases", "No previous purchase found for this device. If you purchased on the web, make sure you're using the same device.");
     }
   }, [persistAll]);
 

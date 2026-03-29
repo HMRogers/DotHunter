@@ -1,55 +1,74 @@
 // ═══════════════════════════════════════════
-// IN-APP PURCHASE — Google Play Billing
-// Uses expo-in-app-purchases for the $1.99
-// one-time unlock. Falls back gracefully if
-// IAP is unavailable (e.g. in development).
+// PURCHASE — Web-based Stripe Checkout
+// Opens the Stripe checkout in the device
+// browser. Uses the same Vercel API backend
+// as the web version. Device ID is shared
+// so unlock status persists across both.
 // ═══════════════════════════════════════════
-import * as InAppPurchases from "expo-in-app-purchases";
-import { saveData, loadData } from "./storage";
+import * as WebBrowser from "expo-web-browser";
+import { loadData, saveData } from "./storage";
 
-const PRODUCT_ID = "dothunter_full_unlock";
+const API_BASE = "https://dothunter-six.vercel.app";
 
-let isConnected = false;
-// setPurchaseListener doesn't return a subscription in this version
+/**
+ * Get or create a persistent device ID for anonymous purchase tracking.
+ */
+async function getDeviceId(): Promise<string> {
+  const data = await loadData();
+  return data.deviceId || "unknown";
+}
 
-export async function initIAP(onUnlock: () => void): Promise<void> {
+/**
+ * Check if the device has been unlocked via the backend.
+ */
+export async function checkUnlockStatus(): Promise<boolean> {
   try {
-    await InAppPurchases.connectAsync();
-    isConnected = true;
-
-    // Listen for purchase results
-    InAppPurchases.setPurchaseListener(({ responseCode, results }) => {
-      if (responseCode === InAppPurchases.IAPResponseCode.OK && results) {
-        for (const purchase of results) {
-          if (!purchase.acknowledged) {
-            InAppPurchases.finishTransactionAsync(purchase, false).catch(console.error);
-          }
-          onUnlock();
-        }
-      }
-    });
+    const deviceId = await getDeviceId();
+    const res = await fetch(`${API_BASE}/api/device/status?deviceId=${deviceId}`);
+    if (!res.ok) return false;
+    const json = await res.json();
+    return json.gameUnlocked === true;
   } catch (e) {
-    console.warn("IAP init failed (expected in dev):", e);
-  }
-}
-
-export async function getProduct(): Promise<InAppPurchases.IAPItemDetails | null> {
-  if (!isConnected) return null;
-  try {
-    const { results } = await InAppPurchases.getProductsAsync([PRODUCT_ID]);
-    return results && results.length > 0 ? results[0] : null;
-  } catch {
-    return null;
-  }
-}
-
-export async function purchaseUnlock(): Promise<boolean> {
-  if (!isConnected) {
-    console.warn("IAP not connected — cannot purchase");
+    console.warn("Failed to check unlock status:", e);
     return false;
   }
+}
+
+/**
+ * Open Stripe Checkout in the device browser for the $1.99 unlock.
+ * Returns true if the browser was opened successfully.
+ */
+export async function purchaseUnlock(): Promise<boolean> {
   try {
-    await InAppPurchases.purchaseItemAsync(PRODUCT_ID);
+    const deviceId = await getDeviceId();
+
+    // Create a checkout session via the Vercel API
+    const res = await fetch(`${API_BASE}/api/trpc/purchase.createCheckout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-device-id": deviceId,
+      },
+      body: JSON.stringify({}),
+    });
+
+    if (!res.ok) {
+      console.error("Checkout creation failed:", res.status);
+      return false;
+    }
+
+    const json = await res.json();
+    // tRPC response format: { result: { data: { url: "..." } } }
+    const checkoutUrl =
+      json?.result?.data?.url || json?.result?.data || json?.url;
+
+    if (!checkoutUrl || typeof checkoutUrl !== "string") {
+      console.error("No checkout URL returned:", json);
+      return false;
+    }
+
+    // Open the Stripe checkout in the device browser
+    await WebBrowser.openBrowserAsync(checkoutUrl);
     return true;
   } catch (e) {
     console.error("Purchase error:", e);
@@ -57,24 +76,24 @@ export async function purchaseUnlock(): Promise<boolean> {
   }
 }
 
+/**
+ * Restore purchases by checking the backend status.
+ * Same as checkUnlockStatus since the backend is the source of truth.
+ */
 export async function restorePurchases(): Promise<boolean> {
-  if (!isConnected) return false;
-  try {
-    const { results } = await InAppPurchases.getPurchaseHistoryAsync();
-    if (results && results.length > 0) {
-      return results.some((p) => p.productId === PRODUCT_ID);
-    }
-    return false;
-  } catch {
-    return false;
-  }
+  return checkUnlockStatus();
+}
+
+// No-op stubs to maintain API compatibility with GameScreen
+export async function initIAP(_onUnlock: () => void): Promise<void> {
+  // No native IAP to initialize
 }
 
 export async function disconnectIAP(): Promise<void> {
-  try {
-    if (isConnected) {
-      await InAppPurchases.disconnectAsync();
-      isConnected = false;
-    }
-  } catch {}
+  // No native IAP to disconnect
+}
+
+export async function getProduct(): Promise<null> {
+  // No native product info — price is hardcoded in the UI
+  return null;
 }

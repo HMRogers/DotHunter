@@ -27,7 +27,7 @@
       "package": "com.paperhallway.dothunter",
       "versionCode": 1,
       "permissions": [
-        "com.android.vending.BILLING"
+        "INTERNET"
       ]
     },
     "plugins": [],
