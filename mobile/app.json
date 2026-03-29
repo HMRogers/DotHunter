@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "DotHunter",
+    "slug": "dothunter",
+    "sdkVersion": "51.0.0",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0a0a1a"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.paperhallway.dothunter"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0a0a1a"
+      },
+      "package": "com.paperhallway.dothunter",
+      "versionCode": 1,
+      "permissions": [
+        "com.android.vending.BILLING"
+      ]
+    },
+    "plugins": [],
+    "extra": {
+      "eas": {
+        "projectId": "391a274d-eb9c-4719-8ef4-91c5fc104c08"
+      }
+    },
+    "owner": "poetunknown"
+  }
+}
