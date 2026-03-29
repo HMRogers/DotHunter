@@ -5,9 +5,8 @@
  * Colors: Deep navy bg, neon cyan/green/magenta accents
  */
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
-import { getLoginUrl } from "@/const";
+import { getDeviceId } from "@/lib/deviceId";
 import { playTap, playMiss, playWrongColor, playRoundUp, playGameOver, playAchievement } from "@/lib/audio";
 import {
   DOTS_PER_ROUND, BASE_TIME_MS, TIME_DECREASE, MIN_TIME_MS, MAX_MISSES, FREE_ROUNDS_LIMIT,
@@ -680,10 +679,8 @@ export default function FocusDotGame() {
 
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
-  // Check server-side unlock status on load (if authenticated)
-  const { user: authUser, isAuthenticated } = useAuth();
+  // Check server-side unlock status on load (device-based, no auth required)
   const purchaseQuery = trpc.purchase.status.useQuery(undefined, {
-    enabled: isAuthenticated,
     retry: false,
     refetchOnWindowFocus: false,
   });
@@ -710,11 +707,6 @@ export default function FocusDotGame() {
   }, [persistAll]);
 
   const handleUnlock = useCallback(async () => {
-    if (!isAuthenticated) {
-      // Redirect to login first
-      window.location.href = getLoginUrl();
-      return;
-    }
     setCheckoutLoading(true);
     try {
       const result = await createCheckoutMutation.mutateAsync();
@@ -722,14 +714,15 @@ export default function FocusDotGame() {
         persistAll({ unlocked: true });
         setScreen("menu");
       } else if (result.url) {
-        window.open(result.url, "_blank");
+        // Redirect to Stripe Checkout in the same tab
+        window.location.href = result.url;
       }
     } catch (err) {
       console.error("Checkout error:", err);
     } finally {
       setCheckoutLoading(false);
     }
-  }, [isAuthenticated, createCheckoutMutation, persistAll]);
+  }, [createCheckoutMutation, persistAll]);
 
   const startGame = useCallback((selectedMode: number) => {
     if (!checkFreeRounds(selectedMode)) {
@@ -1082,11 +1075,7 @@ export default function FocusDotGame() {
             </div>
 
             {/* Price button */}
-            {!isAuthenticated && (
-              <div style={{ fontSize: 12, color: t.textMuted, marginBottom: 12, textAlign: "center", padding: "8px 16px", background: `${mc}08`, borderRadius: 10, border: `1px solid ${mc}22` }}>
-                Sign in required to purchase
-              </div>
-            )}
+
             <button onClick={handleUnlock} disabled={checkoutLoading} style={{
               width: "100%", padding: "18px 0", background: checkoutLoading ? t.barBg : `linear-gradient(135deg, ${mc}, ${mc}cc)`,
               border: "none", borderRadius: 14, color: checkoutLoading ? t.textMuted : (isDark ? "#0a0a1a" : "#fff"),
@@ -1095,7 +1084,7 @@ export default function FocusDotGame() {
               boxShadow: checkoutLoading ? "none" : `0 4px 24px ${mc}44`, marginBottom: 10,
               letterSpacing: 0.5, transition: "all 0.3s",
             }}>
-              {checkoutLoading ? "REDIRECTING..." : (!isAuthenticated ? "SIGN IN TO UNLOCK — $1.99" : "UNLOCK FOR $1.99")}
+              {checkoutLoading ? "REDIRECTING TO CHECKOUT..." : "UNLOCK FOR $1.99"}
             </button>
             <div style={{ fontSize: 11, color: t.textMuted, marginBottom: 20 }}>One-time purchase via Stripe. No subscriptions.</div>
 
