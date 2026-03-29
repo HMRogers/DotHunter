@@ -270,7 +270,7 @@ export default function Landing() {
         {/* Hero content */}
         <div style={{ position: "relative", zIndex: 10, textAlign: "center", maxWidth: 800, padding: "0 24px", animation: "slideUp 1s ease-out" }}>
           <div style={{ display: "inline-block", padding: "6px 16px", borderRadius: 100, background: "rgba(0,229,255,0.1)", border: "1px solid rgba(0,229,255,0.2)", marginBottom: 24, fontSize: 13, fontWeight: 600, color: "#00E5FF", letterSpacing: 1 }}>
-            NOW AVAILABLE ON ANDROID
+            PLAY FREE IN YOUR BROWSER
           </div>
           <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: "clamp(48px, 8vw, 80px)", fontWeight: 800, lineHeight: 1.05, marginBottom: 20, background: "linear-gradient(135deg, #00E5FF, #9B6DFF, #E84393)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
             DOTHUNTER
@@ -286,10 +286,10 @@ export default function Landing() {
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="5 3 19 12 5 21 5 3" /></svg>
               Play in Browser
             </Link>
-            <a href="#download" className="cta-btn cta-secondary">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-              Download APK
-            </a>
+            <div className="cta-btn" style={{ padding: "16px 40px", background: "transparent", color: "rgba(255,255,255,0.35)", border: "2px solid rgba(255,255,255,0.12)", cursor: "default", opacity: 0.6 }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3l18 18M20.5 10.5V4h-6.5" /><path d="M9.5 14.5L3 21" /><path d="M14 10l7-7" /><path d="M3 7v14h14" /></svg>
+              Google Play — Coming Soon
+            </div>
           </div>
         </div>
 
@@ -414,17 +414,17 @@ export default function Landing() {
           <div style={{ width: 80, height: 80, borderRadius: "50%", background: "#00E5FF", boxShadow: "0 0 60px #00E5FF44", margin: "0 auto 32px", animation: "pulseGlow 2s infinite" }} />
           <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: "clamp(36px, 6vw, 56px)", fontWeight: 800, color: "#fff", marginBottom: 16 }}>Ready to Hunt?</h2>
           <p style={{ fontSize: 18, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, marginBottom: 40 }}>
-            Play instantly in your browser or download the APK for the full Android experience. No sign-up required.
+            Play instantly in your browser. Google Play release coming soon.
           </p>
           <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/play" className="cta-btn cta-primary">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="5 3 19 12 5 21 5 3" /></svg>
               Play Now — Free
             </Link>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert("APK download will be available soon! For now, play in your browser."); }} className="cta-btn cta-secondary">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-              Download APK
-            </a>
+            <div className="cta-btn" style={{ padding: "16px 40px", background: "transparent", color: "rgba(255,255,255,0.35)", border: "2px solid rgba(255,255,255,0.12)", cursor: "default", opacity: 0.6 }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3l18 18M20.5 10.5V4h-6.5" /><path d="M9.5 14.5L3 21" /><path d="M14 10l7-7" /><path d="M3 7v14h14" /></svg>
+              Google Play — Coming Soon
+            </div>
           </div>
         </div>
       </section>
@@ -439,7 +439,10 @@ export default function Landing() {
           <p style={{ fontSize: 13, color: "rgba(255,255,255,0.3)" }}>
             Hunt every dot. Miss nothing. Built with care. Zero data collected.
           </p>
-          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", marginTop: 12 }}>
+          <div style={{ display: "flex", gap: 24, justifyContent: "center", marginTop: 16, marginBottom: 12 }}>
+            <Link href="/privacy" style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", textDecoration: "none", transition: "color 0.2s" }}>Privacy Policy</Link>
+          </div>
+          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.2)" }}>
             &copy; {new Date().getFullYear()} DotHunter. All rights reserved.
           </p>
         </div>

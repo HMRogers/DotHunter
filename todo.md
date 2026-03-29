@@ -8,4 +8,7 @@
 - [x] Store purchase status in database
 - [x] Run database migration (pnpm db:push)
 - [x] Write vitest tests for Stripe payment flow
-- [ ] Configure dothuntergame.app domain
+- [x] Configure dothuntergame.app domain
+- [x] Replace Download APK button with Google Play Coming Soon inactive button
+- [x] Add privacy policy page with route
+- [x] Configure dothuntergame.app domain
