@@ -2,11 +2,11 @@
   "expo": {
     "name": "DotHunter",
     "slug": "dothunter",
-    "sdkVersion": "51.0.0",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -25,13 +25,24 @@
         "backgroundColor": "#0a0a1a"
       },
       "package": "com.paperhallway.dothunter",
-      "versionCode": 2,
-      "targetSdkVersion": 35,
-      "permissions": [
-        "INTERNET"
-      ]
+      "versionCode": 3
     },
-    "plugins": [],
+        "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "targetSdkVersion": 35,
+            "compileSdkVersion": 35,
+            "buildToolsVersion": "35.0.0",
+            "kotlinVersion": "1.9.25",
+            "extraProguardRules": "",
+            "extraMavenRepos": []
+          }
+        }
+      ],
+      "expo-asset"
+    ],
     "extra": {
       "eas": {
         "projectId": "391a274d-eb9c-4719-8ef4-91c5fc104c08"
