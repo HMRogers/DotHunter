@@ -7,61 +7,11 @@ const getAudio = (): AudioContext | null => { if (!audioCtx && AudioCtx) audioCt
 
 export function playTap() {
   const c = getAudio(); if (!c) return;
-  const now = c.currentTime;
-
-  // Layer 1: Initial "pop" burst — short noise burst simulating the membrane snap
-  const bufferSize = c.sampleRate * 0.06;
-  const noiseBuffer = c.createBuffer(1, bufferSize, c.sampleRate);
-  const noiseData = noiseBuffer.getChannelData(0);
-  for (let i = 0; i < bufferSize; i++) {
-    // Shaped noise: louder at start, rapid decay
-    const env = Math.exp(-i / (bufferSize * 0.08));
-    noiseData[i] = (Math.random() * 2 - 1) * env;
-  }
-  const noiseSrc = c.createBufferSource();
-  noiseSrc.buffer = noiseBuffer;
-
-  // Bandpass filter to make noise sound like a pop, not static
-  const popFilter = c.createBiquadFilter();
-  popFilter.type = "bandpass";
-  popFilter.frequency.value = 2400;
-  popFilter.Q.value = 0.8;
-
-  const noiseGain = c.createGain();
-  noiseGain.gain.setValueAtTime(0.35, now);
-  noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
-
-  noiseSrc.connect(popFilter);
-  popFilter.connect(noiseGain);
-  noiseGain.connect(c.destination);
-  noiseSrc.start(now);
-  noiseSrc.stop(now + 0.06);
-
-  // Layer 2: Descending "bubble release" tone — the satisfying pitch drop
-  const osc = c.createOscillator();
-  const oscGain = c.createGain();
-  osc.type = "sine";
-  osc.frequency.setValueAtTime(1200, now);
-  osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
-  oscGain.gain.setValueAtTime(0.2, now);
-  oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-  osc.connect(oscGain);
-  oscGain.connect(c.destination);
-  osc.start(now);
-  osc.stop(now + 0.12);
-
-  // Layer 3: Subtle high harmonic "sparkle" for juiciness
-  const sparkle = c.createOscillator();
-  const sparkleGain = c.createGain();
-  sparkle.type = "sine";
-  sparkle.frequency.setValueAtTime(3200, now);
-  sparkle.frequency.exponentialRampToValueAtTime(1800, now + 0.08);
-  sparkleGain.gain.setValueAtTime(0.08, now);
-  sparkleGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-  sparkle.connect(sparkleGain);
-  sparkleGain.connect(c.destination);
-  sparkle.start(now);
-  sparkle.stop(now + 0.08);
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = "sine"; o.frequency.setValueAtTime(880, c.currentTime);
+  o.frequency.exponentialRampToValueAtTime(1760, c.currentTime + 0.06);
+  g.gain.setValueAtTime(0.18, c.currentTime); g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.1);
+  o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime + 0.1);
 }
 
 export function playMiss() {
