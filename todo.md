@@ -12,3 +12,5 @@
 - [x] Replace Download APK button with Google Play Coming Soon inactive button
 - [x] Add privacy policy page with route
 - [x] Configure dothuntergame.app domain
+- [x] Bubble pop animation when tapping dots (scale up, burst particles)
+- [x] Bubble pop sound effect (replace current tap sound)

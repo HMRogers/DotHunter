@@ -30,14 +30,25 @@ function Dot({ dot, onTap, small }: { dot: DotData; onTap: (d: DotData) => void;
     <div
       style={{
         position: "absolute", left: dot.x - sz / 2, top: dot.y - sz / 2, width: sz, height: sz,
-        borderRadius: "50%", background: dot.color,
-        boxShadow: `0 0 16px ${dot.color}88, 0 0 32px ${dot.color}44`,
+        borderRadius: "50%",
+        background: `radial-gradient(circle at 35% 30%, ${dot.color}CC, ${dot.color} 50%, ${dot.color}88 100%)`,
+        boxShadow: `0 0 18px ${dot.color}66, 0 0 36px ${dot.color}33, inset 0 -4px 8px ${dot.color}44`,
         transform: `scale(${scale})`, transition: "transform 0.14s cubic-bezier(.4,0,.2,1)",
         cursor: "pointer", zIndex: 10,
         WebkitTapHighlightColor: "transparent", touchAction: "manipulation",
+        overflow: "hidden",
       }}
       onPointerDown={() => onTap(dot)}
-    />
+    >
+      {/* Glossy bubble highlight */}
+      <div style={{
+        position: "absolute", top: "12%", left: "20%", width: "35%", height: "28%",
+        borderRadius: "50%",
+        background: "radial-gradient(ellipse at center, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 100%)",
+        transform: "rotate(-25deg)",
+        pointerEvents: "none",
+      }} />
+    </div>
   );
 }
 
@@ -69,13 +80,49 @@ function MissIndicator({ misses, max, t }: { misses: number; max: number; t: The
   );
 }
 
-function Ripple({ x, y, color }: { x: number; y: number; color: string }) {
+function BubblePop({ x, y, color }: { x: number; y: number; color: string }) {
+  // Generate 8 particles in a circle
+  const particles = Array.from({ length: 8 }, (_, i) => {
+    const angle = (i / 8) * Math.PI * 2;
+    const dist = 28 + Math.random() * 16;
+    return {
+      tx: Math.cos(angle) * dist,
+      ty: Math.sin(angle) * dist,
+      size: 4 + Math.random() * 5,
+      delay: Math.random() * 0.04,
+    };
+  });
   return (
-    <div style={{
-      position: "absolute", left: x - 30, top: y - 30, width: 60, height: 60,
-      borderRadius: "50%", border: `2px solid ${color}`,
-      animation: "rippleOut 0.4s ease-out forwards", pointerEvents: "none", zIndex: 20,
-    }} />
+    <div style={{ position: "absolute", left: x, top: y, width: 0, height: 0, pointerEvents: "none", zIndex: 25 }}>
+      {/* Expanding ring */}
+      <div style={{
+        position: "absolute", left: -30, top: -30, width: 60, height: 60,
+        borderRadius: "50%", border: `2px solid ${color}`,
+        animation: "bubbleRingPop 0.4s ease-out forwards",
+      }} />
+      {/* Center flash */}
+      <div style={{
+        position: "absolute", left: -20, top: -20, width: 40, height: 40,
+        borderRadius: "50%",
+        background: `radial-gradient(circle, ${color}88 0%, transparent 70%)`,
+        animation: "bubbleCenterFlash 0.3s ease-out forwards",
+      }} />
+      {/* Burst particles */}
+      {particles.map((p, i) => (
+        <div key={i} style={{
+          position: "absolute",
+          left: -p.size / 2, top: -p.size / 2,
+          width: p.size, height: p.size,
+          borderRadius: "50%",
+          background: color,
+          boxShadow: `0 0 6px ${color}88`,
+          animation: `bubbleParticle 0.45s ease-out ${p.delay}s forwards`,
+          // @ts-ignore
+          '--tx': `${p.tx}px`,
+          '--ty': `${p.ty}px`,
+        } as React.CSSProperties} />
+      ))}
+    </div>
   );
 }
 
@@ -1000,7 +1047,7 @@ export default function FocusDotGame() {
               </div>
             )}
             {dots.map(dot => <Dot key={dot.id} dot={dot} onTap={handleDotTap} small={mode === 3} />)}
-            {ripples.map(r => <Ripple key={r.id} x={r.x} y={r.y} color={r.color} />)}
+            {ripples.map(r => <BubblePop key={r.id} x={r.x} y={r.y} color={r.color} />)}
             {mode === 2 && countdown === null && (
               <div style={{ position: "absolute", bottom: 12, left: 0, right: 0, textAlign: "center", fontSize: 11, color: t.textMuted, pointerEvents: "none" }}>
                 Tap <span style={{ color: TARGET_COLOR_MODE2 }}>●</span> green only
