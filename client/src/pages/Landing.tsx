@@ -286,10 +286,10 @@ export default function Landing() {
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="5 3 19 12 5 21 5 3" /></svg>
               Play in Browser
             </Link>
-            <div className="cta-btn" style={{ padding: "16px 40px", background: "transparent", color: "rgba(255,255,255,0.35)", border: "2px solid rgba(255,255,255,0.12)", cursor: "default", opacity: 0.6 }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3l18 18M20.5 10.5V4h-6.5" /><path d="M9.5 14.5L3 21" /><path d="M14 10l7-7" /><path d="M3 7v14h14" /></svg>
-              Google Play — Coming Soon
-            </div>
+            <a href="https://play.google.com/apps/internaltest/4701596875361594970" target="_blank" rel="noopener noreferrer" className="cta-btn cta-secondary">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+              Test for Free
+            </a>
           </div>
         </div>
 
@@ -414,17 +414,17 @@ export default function Landing() {
           <div style={{ width: 80, height: 80, borderRadius: "50%", background: "#00E5FF", boxShadow: "0 0 60px #00E5FF44", margin: "0 auto 32px", animation: "pulseGlow 2s infinite" }} />
           <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: "clamp(36px, 6vw, 56px)", fontWeight: 800, color: "#fff", marginBottom: 16 }}>Ready to Hunt?</h2>
           <p style={{ fontSize: 18, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, marginBottom: 40 }}>
-            Play instantly in your browser. Google Play release coming soon.
+            Play instantly in your browser or test the Android app for free.
           </p>
           <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/play" className="cta-btn cta-primary">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="5 3 19 12 5 21 5 3" /></svg>
               Play Now — Free
             </Link>
-            <div className="cta-btn" style={{ padding: "16px 40px", background: "transparent", color: "rgba(255,255,255,0.35)", border: "2px solid rgba(255,255,255,0.12)", cursor: "default", opacity: 0.6 }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3l18 18M20.5 10.5V4h-6.5" /><path d="M9.5 14.5L3 21" /><path d="M14 10l7-7" /><path d="M3 7v14h14" /></svg>
-              Google Play — Coming Soon
-            </div>
+            <a href="https://play.google.com/apps/internaltest/4701596875361594970" target="_blank" rel="noopener noreferrer" className="cta-btn cta-secondary">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+              Test for Free
+            </a>
           </div>
         </div>
       </section>

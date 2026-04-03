@@ -12,3 +12,4 @@
 - [x] Replace Download APK button with Google Play Coming Soon inactive button
 - [x] Add privacy policy page with route
 - [x] Configure dothuntergame.app domain
+- [x] Change Google Play Coming Soon button to Test for Free with internal testing link
