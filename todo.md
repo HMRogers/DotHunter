@@ -13,3 +13,6 @@
 - [x] Add privacy policy page with route
 - [x] Configure dothuntergame.app domain
 - [x] Change Google Play Coming Soon button to Test for Free with internal testing link
+- [x] Change Play in Browser to Test for Free in Browser with limited time only subtitle
+- [x] Change Test for Free to Test for Free on Android Mobile
+- [x] Remove Play Now button from top right navigation

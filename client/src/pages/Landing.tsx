@@ -243,9 +243,7 @@ export default function Landing() {
             <a href="#features" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none", fontSize: 14, fontWeight: 500, transition: "color 0.2s" }}>Features</a>
             <a href="#modes" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none", fontSize: 14, fontWeight: 500, transition: "color 0.2s" }}>Game Modes</a>
             <a href="#video" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none", fontSize: 14, fontWeight: 500, transition: "color 0.2s" }}>Trailer</a>
-            <Link href="/play" className="cta-btn cta-primary" style={{ padding: "10px 24px", fontSize: 14 }}>
-              Play Now
-            </Link>
+
           </div>
         </div>
       </nav>
@@ -270,7 +268,7 @@ export default function Landing() {
         {/* Hero content */}
         <div style={{ position: "relative", zIndex: 10, textAlign: "center", maxWidth: 800, padding: "0 24px", animation: "slideUp 1s ease-out" }}>
           <div style={{ display: "inline-block", padding: "6px 16px", borderRadius: 100, background: "rgba(0,229,255,0.1)", border: "1px solid rgba(0,229,255,0.2)", marginBottom: 24, fontSize: 13, fontWeight: 600, color: "#00E5FF", letterSpacing: 1 }}>
-            PLAY FREE IN YOUR BROWSER
+            TEST FOR FREE — LIMITED TIME ONLY
           </div>
           <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: "clamp(48px, 8vw, 80px)", fontWeight: 800, lineHeight: 1.05, marginBottom: 20, background: "linear-gradient(135deg, #00E5FF, #9B6DFF, #E84393)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
             DOTHUNTER
@@ -282,14 +280,20 @@ export default function Landing() {
             A neon-lit reaction game that tests your speed, focus, and color perception across three intense game modes. How fast can you hunt?
           </p>
           <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/play" className="cta-btn cta-primary">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="5 3 19 12 5 21 5 3" /></svg>
-              Play in Browser
-            </Link>
-            <a href="https://play.google.com/apps/internaltest/4701596875361594970" target="_blank" rel="noopener noreferrer" className="cta-btn cta-secondary">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3" /></svg>
-              Test for Free
-            </a>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <Link href="/play" className="cta-btn cta-primary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                Test for Free in Browser
+              </Link>
+              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 6, letterSpacing: 1, textTransform: "uppercase" }}>Limited time only</span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <a href="https://play.google.com/apps/internaltest/4701596875361594970" target="_blank" rel="noopener noreferrer" className="cta-btn cta-secondary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                Test for Free on Android
+              </a>
+              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 6, letterSpacing: 1, textTransform: "uppercase" }}>Limited time only</span>
+            </div>
           </div>
         </div>
 
@@ -417,14 +421,20 @@ export default function Landing() {
             Play instantly in your browser or test the Android app for free.
           </p>
           <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/play" className="cta-btn cta-primary">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="5 3 19 12 5 21 5 3" /></svg>
-              Play Now — Free
-            </Link>
-            <a href="https://play.google.com/apps/internaltest/4701596875361594970" target="_blank" rel="noopener noreferrer" className="cta-btn cta-secondary">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3" /></svg>
-              Test for Free
-            </a>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <Link href="/play" className="cta-btn cta-primary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                Test for Free in Browser
+              </Link>
+              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 6, letterSpacing: 1, textTransform: "uppercase" }}>Limited time only</span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <a href="https://play.google.com/apps/internaltest/4701596875361594970" target="_blank" rel="noopener noreferrer" className="cta-btn cta-secondary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                Test for Free on Android
+              </a>
+              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 6, letterSpacing: 1, textTransform: "uppercase" }}>Limited time only</span>
+            </div>
           </div>
         </div>
       </section>
