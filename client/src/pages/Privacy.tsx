@@ -96,7 +96,7 @@ export default function Privacy() {
 
         {/* Back to game CTA */}
         <div style={{ textAlign: "center", marginTop: 64, paddingTop: 40, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <Link href="/play" style={{
+          <a href="https://play.google.com/store/apps/details?id=com.paperhallway.dothunter&hl=en" target="_blank" rel="noopener noreferrer" style={{
             display: "inline-flex",
             alignItems: "center",
             gap: 10,
@@ -110,8 +110,8 @@ export default function Privacy() {
             textDecoration: "none",
             transition: "all 0.3s ease",
           }}>
-            Play DotHunter
-          </Link>
+            Test Now on Google Play
+          </a>
         </div>
       </main>
 
